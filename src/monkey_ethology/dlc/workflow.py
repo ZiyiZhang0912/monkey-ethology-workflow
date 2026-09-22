@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 from .project import DLCProjectManager
-from ..config import AgentConfig
+from ..config import WorkflowConfig
 from ..io.schema import load_keypoints, parse_session_name, save_table
 
 
@@ -25,7 +25,7 @@ def convert_dlc_outputs(
     return written
 
 
-def run_tracking(config: AgentConfig, videos: Sequence[str], steps: Optional[Sequence[str]] = None):
+def run_tracking(config: WorkflowConfig, videos: Sequence[str], steps: Optional[Sequence[str]] = None):
     manager = DLCProjectManager(config)
     cfg_path = manager.run_steps(videos, steps=steps, bodyparts=config.bodyparts)
     return {"config_path": str(cfg_path), "log": manager.log, "available": manager.available}

@@ -8,7 +8,7 @@ import pandas as pd
 from .classify.circling import detect_circling
 from .classify.locomotion import segment_locomotion, segments_to_frame
 from .classify.stereotypy import detect_stereotypy
-from .config import AgentConfig, dump_resolved_config, load_config
+from .config import WorkflowConfig, dump_resolved_config, load_config
 from .dlc.project import DLCProjectManager
 from .dlc.workflow import convert_dlc_outputs
 from .features.adaptive_com import AdaptiveCOMExtractor
@@ -23,9 +23,9 @@ from .viz.video_annotate import annotate_session_video
 PathLike = Union[str, Path]
 
 
-class EthologyAgent:
+class EthologyWorkflow:
     """
-    笼内猕猴行为分析 Agent。
+    笼内猕猴行为分析 Workflow。
 
     阶段：
       1. track()     DeepLabCut 项目创建 / 标注 / 训练 / 推理
@@ -38,8 +38,8 @@ class EthologyAgent:
       8. run()       从关键点或 DLC 产物一键跑完分类+可视化(+可选视频标注)
     """
 
-    def __init__(self, config: Optional[Union[AgentConfig, PathLike]] = None, **load_kwargs):
-        if isinstance(config, AgentConfig):
+    def __init__(self, config: Optional[Union[WorkflowConfig, PathLike]] = None, **load_kwargs):
+        if isinstance(config, WorkflowConfig):
             self.config = config
         else:
             self.config = load_config(config, **load_kwargs)

@@ -1,8 +1,8 @@
-# Monkey Ethology Agent
+# Monkey Ethology WorkFlow
 
 笼内猕猴行为分析流水线：**DeepLabCut 姿态追踪 → 规则行为分类 → 学术可视化 → 行为标注视频**。
 
-本仓库提供可配置的分析 Agent。追踪标记点按实验指定；行为标签为基于阈值的 locomotion ethogram（Static / Walking / Climbing），并可选刻板与转圈检测。参数通过 YAML 与 CLI 暴露。个体数 / 天数不固定，由 `study` 配置或 CLI 决定。
+本仓库提供可配置的分析 Workflow。追踪标记点按实验指定；行为标签为基于阈值的 locomotion ethogram（Static / Walking / Climbing），并可选刻板与转圈检测。参数通过 YAML 与 CLI 暴露。个体数 / 天数不固定，由 `study` 配置或 CLI 决定。
 
 ---
 
@@ -38,9 +38,11 @@
 7. 导出 ethogram、时间预算、轨迹、热图、标准对比图与汇总表。
 8. 将分类结果叠加到原始视频（骨架 + `Behavior: …` 标签）。
 
-入口：`EthologyAgent`（`src/monkey_ethology/agent.py`）与 CLI `python -m monkey_ethology`。
+入口：`EthologyWorkflow`（`src/monkey_ethology/workflow.py`）与 CLI `python -m monkey_ethology`。
 
 ---
+
+
 
 ## 处理流程
 
@@ -81,22 +83,28 @@ python -m monkey_ethology run \
 
 ---
 
+
+
 ## 环境要求
 
-| 组件 | 说明 |
-|------|------|
-| Python | ≥ 3.9 |
-| 核心依赖 | `numpy`, `pandas`, `scipy`, `matplotlib`, `pyyaml`, `h5py`, `opencv-python-headless` |
-| DeepLabCut | 可选；仅 `track` 训练/推理需要 |
-| OpenCV | 视频标注（`annotate-video`）需要 |
-| Streamlit | 可选；用于 `apps/viz_studio.py` |
+
+| 组件         | 说明                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------ |
+| Python     | ≥ 3.9                                                                                |
+| 核心依赖       | `numpy`, `pandas`, `scipy`, `matplotlib`, `pyyaml`, `h5py`, `opencv-python-headless` |
+| DeepLabCut | 可选；仅 `track` 训练/推理需要                                                                 |
+| OpenCV     | 视频标注（`annotate-video`）需要                                                             |
+| Streamlit  | 可选；用于 `apps/viz_studio.py`                                                           |
+
 
 ---
+
+
 
 ## 安装
 
 ```bash
-cd monkey-ethology-agent
+cd monkey-ethology-workflow
 python -m pip install -e .
 
 # 可选扩展
@@ -115,7 +123,11 @@ python examples/run_synthetic.py
 
 ---
 
+
+
 ## 快速开始
+
+
 
 ### 姿态追踪（DeepLabCut）
 
@@ -144,11 +156,13 @@ python -m monkey_ethology track \
 DLC 推理完成后转为扁平表：
 
 ```python
-from monkey_ethology import EthologyAgent, load_config
+from monkey_ethology import EthologyWorkflow, load_config
 
-agent = EthologyAgent(load_config())
-agent.convert_dlc(["/path/to/DLC_resnet50_....h5"])
+workflow = EthologyWorkflow(load_config())
+workflow.convert_dlc(["/path/to/DLC_resnet50_....h5"])
 ```
+
+
 
 ### 行为分类与出图
 
@@ -183,6 +197,8 @@ study:
   filename_template: "{animal}-day{day}"
 ```
 
+
+
 ### 仅可视化
 
 ```bash
@@ -194,6 +210,8 @@ python -m monkey_ethology visualize \
   --language en \
   --output ./output/figures
 ```
+
+
 
 ### 行为标注视频
 
@@ -235,6 +253,8 @@ streamlit run apps/viz_studio.py
 
 ---
 
+
+
 ## 配置
 
 默认值见 `configs/default.yaml`。每次运行会在输出目录写入 `resolved_config.yaml`（合并后的生效配置）。
@@ -247,16 +267,20 @@ streamlit run apps/viz_studio.py
 4. CLI 参数（`--bodyparts`、`--plots`、`--language` 等）
 5. Python：`cfg.set("dotted.key", value)`
 
+
+
 ### 内置模板
 
-| 路径 | 用途 |
-|------|------|
-| `configs/bodyparts/primate_minimal.yaml` | Head, Back, Tail(Root) |
-| `configs/bodyparts/primate_extended.yaml` | 扩展灵长类骨架 |
-| `configs/cages/default.yaml` | 当前唯一笼子几何（25 fps，720×406） |
-| `configs/animals/default.yaml` | 通用 locomotion 阈值（任意个体共用） |
-| `configs/visualization.yaml` | 可视化默认项 |
-| `configs/demo_study.yaml` | 演示用 study + 视频标注叠加配置 |
+
+| 路径                                        | 用途                       |
+| ----------------------------------------- | ------------------------ |
+| `configs/bodyparts/primate_minimal.yaml`  | Head, Back, Tail(Root)   |
+| `configs/bodyparts/primate_extended.yaml` | 扩展灵长类骨架                  |
+| `configs/cages/default.yaml`              | 当前唯一笼子几何（25 fps，720×406） |
+| `configs/animals/default.yaml`            | 通用 locomotion 阈值（任意个体共用） |
+| `configs/visualization.yaml`              | 可视化默认项                   |
+| `configs/demo_study.yaml`                 | 演示用 study + 视频标注叠加配置     |
+
 
 `--animal` 是个体标签，不必为每只动物建文件。仅当某只需要单独调参时，再复制 `animals/default.yaml` 为 `{id}.yaml`。
 
@@ -264,25 +288,29 @@ streamlit run apps/viz_studio.py
 
 适用于 `track`、`run`、`classify`、`visualize`、`annotate-video`：
 
-| 参数 | 说明 |
-|------|------|
-| `--config` | 主 YAML |
-| `--bodyparts-file` | 标记点 YAML |
-| `--bodyparts` | 逗号分隔点名 |
-| `--cage` | `default` 或路径；省略则用主配置 `cage` 段 |
-| `--animal` | 任意个体 ID（标签）或阈值 YAML 路径 |
-| `--animals` | 逗号分隔个体列表，覆盖 `study.animals` |
-| `--days` | 逗号分隔天数，覆盖 `study.days` |
-| `--video-dir` | 原始视频目录（与 stem 同名） |
-| `--no-annotate` | 跳过行为标注视频 |
-| `--viz-config` | 可视化 YAML |
-| `--output` | 输出根目录（同时作为 DLC 工作目录） |
-| `--plots` | 逗号分隔图类型 |
-| `--language` | `zh` \| `en` |
-| `--formats` | 如 `png,pdf` |
-| `--dpi` | 出图 DPI |
+
+| 参数                 | 说明                             |
+| ------------------ | ------------------------------ |
+| `--config`         | 主 YAML                         |
+| `--bodyparts-file` | 标记点 YAML                       |
+| `--bodyparts`      | 逗号分隔点名                         |
+| `--cage`           | `default` 或路径；省略则用主配置 `cage` 段 |
+| `--animal`         | 任意个体 ID（标签）或阈值 YAML 路径         |
+| `--animals`        | 逗号分隔个体列表，覆盖 `study.animals`    |
+| `--days`           | 逗号分隔天数，覆盖 `study.days`         |
+| `--video-dir`      | 原始视频目录（与 stem 同名）              |
+| `--no-annotate`    | 跳过行为标注视频                       |
+| `--viz-config`     | 可视化 YAML                       |
+| `--output`         | 输出根目录（同时作为 DLC 工作目录）           |
+| `--plots`          | 逗号分隔图类型                        |
+| `--language`       | `zh` | `en`                    |
+| `--formats`        | 如 `png,pdf`                    |
+| `--dpi`            | 出图 DPI                         |
+
 
 ---
+
+
 
 ## DeepLabCut 集成
 
@@ -292,29 +320,31 @@ streamlit run apps/viz_studio.py
 
 ### 步骤与 API 对应
 
-| `--steps` 名称 | DeepLabCut API | 作用 |
-|----------------|----------------|------|
-| `create_project` | `deeplabcut.create_new_project` | 创建项目与初始 config |
-| `set_bodyparts` | 编辑 `config.yaml` | 写入 bodyparts / skeleton / pcutoff |
-| `extract_frames` | `deeplabcut.extract_frames` | 抽帧供标注 |
-| `label_frames` | `deeplabcut.label_frames` | 标注 GUI（需显示器） |
-| `check_labels` | `deeplabcut.check_labels` | 标注检查 |
-| `create_training_dataset` | `deeplabcut.create_training_dataset` | 生成训练集 |
-| `train_network` | `deeplabcut.train_network` | 训练 |
-| `evaluate_network` | `deeplabcut.evaluate_network` | 评估 |
-| `analyze_videos` | `deeplabcut.analyze_videos` | 推理 → h5/csv |
-| `filterpredictions` | `deeplabcut.filterpredictions` | 时序滤波 |
-| `create_labeled_video` | `deeplabcut.create_labeled_video` | 叠加预览视频 |
+
+| `--steps` 名称              | DeepLabCut API                       | 作用                                |
+| ------------------------- | ------------------------------------ | --------------------------------- |
+| `create_project`          | `deeplabcut.create_new_project`      | 创建项目与初始 config                    |
+| `set_bodyparts`           | 编辑 `config.yaml`                     | 写入 bodyparts / skeleton / pcutoff |
+| `extract_frames`          | `deeplabcut.extract_frames`          | 抽帧供标注                             |
+| `label_frames`            | `deeplabcut.label_frames`            | 标注 GUI（需显示器）                      |
+| `check_labels`            | `deeplabcut.check_labels`            | 标注检查                              |
+| `create_training_dataset` | `deeplabcut.create_training_dataset` | 生成训练集                             |
+| `train_network`           | `deeplabcut.train_network`           | 训练                                |
+| `evaluate_network`        | `deeplabcut.evaluate_network`        | 评估                                |
+| `analyze_videos`          | `deeplabcut.analyze_videos`          | 推理 → h5/csv                       |
+| `filterpredictions`       | `deeplabcut.filterpredictions`       | 时序滤波                              |
+| `create_labeled_video`    | `deeplabcut.create_labeled_video`    | 叠加预览视频                            |
+
 
 另提供精炼相关封装：`extract_outlier_frames`、`refine_labels`、`merge_datasets`。
 
 ### 传入 DLC 的配置项
 
-**项目**（`project.*`）：`name`、`experimenter`、`working_directory`、`copy_videos`、`videotype`。
+**项目**（`project.`*）：`name`、`experimenter`、`working_directory`、`copy_videos`、`videotype`。
 
-**抽帧**（`dlc.*`）：`extract_mode`（`automatic` \| `manual`）、`extract_algo`（`kmeans` \| `uniform`）、`userfeedback`、`numframes2pick`。
+**抽帧**（`dlc.`*）：`extract_mode`（`automatic`  `manual`）、`extract_algo`（`kmeans`  `uniform`）、`userfeedback`、`numframes2pick`。
 
-**训练**（`dlc.*`）：`net_type`、`augmenter_type`、`shuffle`、`displayiters`、`saveiters`、`maxiters`、`pcutoff`。
+**训练**（`dlc.`*）：`net_type`、`augmenter_type`、`shuffle`、`displayiters`、`saveiters`、`maxiters`、`pcutoff`。
 
 **推理**：`save_as_csv`、`videotype`、输出目录位于 `--output` 下。
 
@@ -330,6 +360,8 @@ python -m monkey_ethology track \
 
 ---
 
+
+
 ## 行为分析
 
 分类为**阈值规则 + 信号特征**，非 SVM / 随机森林 / HMM 训练管线。实现位于 `preprocess/`、`features/`、`classify/`。
@@ -340,11 +372,15 @@ python -m monkey_ethology track \
 
 ### 预处理
 
-| 模块 | 方法 |
-|------|------|
-| 遮挡 | 检测 `p < p_threshold` 的连续段；线性插值，并施加位移 / 速度 / 边界约束 |
-| 异常 | 越界裁剪；大跳变用邻帧平均或限速修复 |
-| 平滑 | 低置信帧保持上一高置信坐标，再对 x/y 做一维中值滤波 |
+
+| 模块  | 方法                                               |
+| --- | ------------------------------------------------ |
+| 遮挡  | 检测 `p < p_threshold` 的连续段；线性插值，并施加位移 / 速度 / 边界约束 |
+| 异常  | 越界裁剪；大跳变用邻帧平均或限速修复                               |
+| 平滑  | 低置信帧保持上一高置信坐标，再对 x/y 做一维中值滤波                     |
+
+
+
 
 ### 特征提取（`AdaptiveCOMExtractor`）
 
@@ -377,7 +413,7 @@ CSV 中 pattern：`0` Static，`2` Walking，`3` Climbing。`reasons` 列为规�
 
 ### 刻板（可选）
 
-约 3 s 窗、1 s 步长的四特征：周期性（FFT）、角速度标准差、圆拟合误差、累积角位移。默认：高周期性 **且** 高角速度波动 **且**（圆误差小 **或** \|累积角\| > 2π）。关闭：`stereotypy.enabled: false`。
+约 3 s 窗、1 s 步长的四特征：周期性（FFT）、角速度标准差、圆拟合误差、累积角位移。默认：高周期性 **且** 高角速度波动 **且**（圆误差小 **或** 累积角 > 2π）。关闭：`stereotypy.enabled: false`。
 
 ### 转圈（可选）
 
@@ -385,52 +421,70 @@ CSV 中 pattern：`0` Static，`2` Walking，`3` Climbing。`reasons` 列为规�
 
 ---
 
+
+
 ## 参数说明
 
 默认见 `configs/default.yaml`。个体覆盖见 `configs/animals/{id}.yaml`。
 
 ### `bodyparts`
 
-| 键 | 含义 |
-|----|------|
-| `names` | 追踪点列表 |
-| `skeleton` | DLC / 叠加用骨架边 |
-| `com_joints` | 参与 COM 的点 |
-| `orientation_pairs` | 朝向优先点对 |
-| `head_joint` / `tail_joint` | 头尾差与刻板轴向 |
-| `sitting_joints` | 坐姿遮挡启发式 |
-| `aliases` | 列名别名（如 Tail → Tail(Root)） |
+
+| 键                           | 含义                        |
+| --------------------------- | ------------------------- |
+| `names`                     | 追踪点列表                     |
+| `skeleton`                  | DLC / 叠加用骨架边              |
+| `com_joints`                | 参与 COM 的点                 |
+| `orientation_pairs`         | 朝向优先点对                    |
+| `head_joint` / `tail_joint` | 头尾差与刻板轴向                  |
+| `sitting_joints`            | 坐姿遮挡启发式                   |
+| `aliases`                   | 列名别名（如 Tail → Tail(Root)） |
+
+
+
 
 ### `cage`
 
-| 键 | 小笼默认 | 含义 |
-|----|----------|------|
-| `fps` | 25 | 帧率 |
-| `width` / `height` | 720 / 406 | 分辨率 |
-| `climbing_y` | 202 | COM y 小于此值判攀爬 |
-| `pixel_to_cm` | 0.3202 | 像素 → 厘米 |
-| `session_max_sec` | 1800 | 分析时长上限（`0` 表示不截断） |
+
+| 键                  | 小笼默认      | 含义                |
+| ------------------ | --------- | ----------------- |
+| `fps`              | 25        | 帧率                |
+| `width` / `height` | 720 / 406 | 分辨率               |
+| `climbing_y`       | 202       | COM y 小于此值判攀爬     |
+| `pixel_to_cm`      | 0.3202    | 像素 → 厘米           |
+| `session_max_sec`  | 1800      | 分析时长上限（`0` 表示不截断） |
+
+
+
 
 ### `preprocess` / `features`
 
-| 键 | 默认 | 含义 |
-|----|------|------|
-| `p_threshold` | 0.4 | 低置信阈值 |
-| `min_occlusion_duration` | 3 | 最短遮挡帧数 |
-| `max_displacement` / `max_velocity` | 100 / 50 | 跳变 / 速度上限 |
-| `smooth_window` | 5 | 中值窗；`≤0` 关闭 |
-| `features.window_size` | 13 | 特征窗长度 |
+
+| 键                                   | 默认       | 含义          |
+| ----------------------------------- | -------- | ----------- |
+| `p_threshold`                       | 0.4      | 低置信阈值       |
+| `min_occlusion_duration`            | 3        | 最短遮挡帧数      |
+| `max_displacement` / `max_velocity` | 100 / 50 | 跳变 / 速度上限   |
+| `smooth_window`                     | 5        | 中值窗；`≤0` 关闭 |
+| `features.window_size`              | 13       | 特征窗长度       |
+
+
+
 
 ### `locomotion`
 
-| 键 | 默认（通用） | 含义 |
-|----|------------------|------|
-| `velocity_threshold` | 10.0 | 速度门限 |
-| `displacement_threshold` | 4.0 | 位移门限 |
-| `window_threshold` | 5 | 连续运动窗数 |
-| `head_tail_difference_threshold` | 75.0 | 头尾差攀爬 |
+
+| 键                                     | 默认（通用）     | 含义     |
+| ------------------------------------- | ---------- | ------ |
+| `velocity_threshold`                  | 10.0       | 速度门限   |
+| `displacement_threshold`              | 4.0        | 位移门限   |
+| `window_threshold`                    | 5          | 连续运动窗数 |
+| `head_tail_difference_threshold`      | 75.0       | 头尾差攀爬  |
 | `com_x_threshold` / `com_y_threshold` | 5.5 / 10.5 | 垂直运动攀爬 |
-| `subwindow_size` | 4 | 细分子窗 |
+| `subwindow_size`                      | 4          | 细分子窗   |
+
+
+
 
 ### `stereotypy` / `circling` / `visualization`
 
@@ -438,22 +492,28 @@ CSV 中 pattern：`0` Static，`2` Walking，`3` Climbing。`reasons` 列为规�
 
 ---
 
+
+
 ## 命令行
 
 ```text
 python -m monkey_ethology {track|run|classify|visualize|annotate-video|init-config} [options]
 ```
 
-| 子命令 | 作用 |
-|--------|------|
-| `track` | DeepLabCut 步骤执行（`--videos`、`--steps`、`--dry-run`） |
-| `run` | ingest → preprocess → features → classify → visualize →（可选）视频标注 |
-| `classify` | 同 `run`，支持 `--no-viz` |
-| `visualize` | 由已有 segment / keypoint / feature 出图 |
-| `annotate-video` | 用 processed + features-segment 在原始视频上叠加行为 |
-| `init-config` | 导出默认可编辑 YAML |
+
+| 子命令              | 作用                                                              |
+| ---------------- | --------------------------------------------------------------- |
+| `track`          | DeepLabCut 步骤执行（`--videos`、`--steps`、`--dry-run`）               |
+| `run`            | ingest → preprocess → features → classify → visualize →（可选）视频标注 |
+| `classify`       | 同 `run`，支持 `--no-viz`                                           |
+| `visualize`      | 由已有 segment / keypoint / feature 出图                             |
+| `annotate-video` | 用 processed + features-segment 在原始视频上叠加行为                       |
+| `init-config`    | 导出默认可编辑 YAML                                                    |
+
 
 ---
+
+
 
 ## 输出说明
 
@@ -476,38 +536,44 @@ output/<run>/
 
 segment 时间（秒）：
 
-\[
-t \approx \frac{\mathrm{start} \times \mathrm{window\_size}}{\mathrm{fps}}
-\]
+
+t \approx \frac{\mathrm{start} \times \mathrm{windowsize}}{\mathrm{fps}}
+
 
 ---
 
+
+
 ## 可视化
 
-| `plots` 名称 | 内容 |
-|--------------|------|
-| `ethogram` | 行为时间谱 + 饼图 |
-| `raster` | 多会话 ethogram 栅格 |
-| `time_budget` | 各态时间占比 |
-| `bout_duration` | 片段时长分布 |
-| `transition` | 转移矩阵 |
-| `trajectory` | 按行为着色的 COM 轨迹 |
-| `heatmap` | 驻留热图 |
-| `velocity` | 速度时序 |
-| `features` | 特征时序 |
-| `position` | 笼内分区占比 |
-| `quality` | 置信度曲线 |
-| `stereotypy` | 四特征刻板面板 |
-| `circling` | 转圈事件叠加 |
-| `publication_figure` | 综合拼图 |
+
+| `plots` 名称               | 内容                 |
+| ------------------------ | ------------------ |
+| `ethogram`               | 行为时间谱 + 饼图         |
+| `raster`                 | 多会话 ethogram 栅格    |
+| `time_budget`            | 各态时间占比             |
+| `bout_duration`          | 片段时长分布             |
+| `transition`             | 转移矩阵               |
+| `trajectory`             | 按行为着色的 COM 轨迹      |
+| `heatmap`                | 驻留热图               |
+| `velocity`               | 速度时序               |
+| `features`               | 特征时序               |
+| `position`               | 笼内分区占比             |
+| `quality`                | 置信度曲线              |
+| `stereotypy`             | 四特征刻板面板            |
+| `circling`               | 转圈事件叠加             |
+| `publication_figure`     | 综合拼图               |
 | `com_trajectory_heatmap` | COM 轨迹 + 驻留热图（标准图） |
-| `body_center` | 身体中心轨迹面板 |
-| `position_analysis` | 上下/左右分区路程与速度 |
-| `behavior_comparison` | 多会话行为状态对比 |
+| `body_center`            | 身体中心轨迹面板           |
+| `position_analysis`      | 上下/左右分区路程与速度       |
+| `behavior_comparison`    | 多会话行为状态对比          |
+
 
 批量 `run` 目录时，会额外写出 cohort 级图：`all_sessions_behavior_comparison`、`all_sessions_position_analysis`、按个体的 raster。
 
 ---
+
+
 
 ## 视频标注
 
@@ -522,57 +588,63 @@ t \approx \frac{\mathrm{start} \times \mathrm{window\_size}}{\mathrm{fps}}
 
 主要配置（`configs/default.yaml` → `video_annotation`）：
 
-| 字段 | 说明 |
-|------|------|
-| `enabled` | 是否在 `run` 中自动标注 |
-| `video_dir` | 原始视频目录（文件名=`{stem}.mp4` / `.MP4` 等） |
-| `output_subdir` | 默认 `annotated_videos` |
-| `draw_labels` | 是否绘制关节点名称与置信度 |
-| `show_animal_on_head` | Head 旁显示动物 ID |
-| `max_frames` / `start_frame` | 预览裁剪；`null` 表示整段 |
+
+| 字段                           | 说明                                  |
+| ---------------------------- | ----------------------------------- |
+| `enabled`                    | 是否在 `run` 中自动标注                     |
+| `video_dir`                  | 原始视频目录（文件名=`{stem}.mp4` / `.MP4` 等） |
+| `output_subdir`              | 默认 `annotated_videos`               |
+| `draw_labels`                | 是否绘制关节点名称与置信度                       |
+| `show_animal_on_head`        | Head 旁显示动物 ID                       |
+| `max_frames` / `start_frame` | 预览裁剪；`null` 表示整段                    |
+
 
 演示脚本：`scripts/run_demo_annotate_video.sh`。
 
 ---
 
+
+
 ## Python API
 
 ```python
-from monkey_ethology import EthologyAgent, load_config
+from monkey_ethology import EthologyWorkflow, load_config
 
 cfg = load_config(cage="default", animal="M01")
 cfg.set_bodyparts(["Head", "Back", "Tail(Root)"])
 cfg.set("visualization.plots", ["ethogram", "heatmap", "publication_figure"])
 cfg.set("io.output_dir", "./output/my_run")
 
-agent = EthologyAgent(cfg)
-# agent.track(["video.mp4"], steps=["create_project", "set_bodyparts"])
-result = agent.run("M01-day1.csv", animal_id="M01", video_dir="./videos")
+workflow = EthologyWorkflow(cfg)
+# workflow.track(["video.mp4"], steps=["create_project", "set_bodyparts"])
+result = workflow.run("M01-day1.csv", animal_id="M01", video_dir="./videos")
 # result["annotated_video"]  # 若找到同名视频
 ```
 
 分步调用：
 
 ```python
-kp = agent.ingest("M01-day1.csv")
-kp = agent.preprocess(kp)
-feat = agent.extract_features(kp)
-seg = agent.classify_locomotion(feat, animal_id="M01")
-agent.visualize("M01-day1", seg, keypoints=kp, features=feat)
-agent.annotate_video("M01-day1", kp, seg, video_dir="./videos", animal_id="M01")
+kp = workflow.ingest("M01-day1.csv")
+kp = workflow.preprocess(kp)
+feat = workflow.extract_features(kp)
+seg = workflow.classify_locomotion(feat, animal_id="M01")
+workflow.visualize("M01-day1", seg, keypoints=kp, features=feat)
+workflow.annotate_video("M01-day1", kp, seg, video_dir="./videos", animal_id="M01")
 ```
 
 ---
 
+
+
 ## 目录结构
 
 ```text
-monkey-ethology-agent/
+monkey-ethology-workflow/
 ├── configs/                 # YAML 默认与模板（含 demo_study.yaml）
 ├── scripts/                 # 演示：出图 / 视频标注
 ├── assets/                  # 可视化背景图等
 ├── src/monkey_ethology/
-│   ├── agent.py             # EthologyAgent
+│   ├── workflow.py             # EthologyWorkflow
 │   ├── cli.py
 │   ├── config.py
 │   ├── study.py             # 个体/天数筛选
@@ -590,6 +662,8 @@ monkey-ethology-agent/
 ```
 
 ---
+
+
 
 ## 常见问题
 
@@ -614,6 +688,8 @@ monkey-ethology-agent/
 换笼子：改 `configs/cages/default.yaml`（或主配置 `cage` 段）。
 
 ---
+
+
 
 ## License
 

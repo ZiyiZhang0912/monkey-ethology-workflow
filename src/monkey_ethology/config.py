@@ -40,7 +40,7 @@ def _maybe_load(path: Optional[PathLike]) -> Dict[str, Any]:
     return _read_yaml(path)
 
 
-class AgentConfig:
+class WorkflowConfig:
     """可变配置对象：YAML + 运行时覆盖。"""
 
     def __init__(self, data: Optional[Mapping[str, Any]] = None):
@@ -49,8 +49,8 @@ class AgentConfig:
             raw = deep_update(raw, data)
         self._data: Dict[str, Any] = raw
 
-    def copy(self) -> "AgentConfig":
-        return AgentConfig(deepcopy(self._data))
+    def copy(self) -> "WorkflowConfig":
+        return WorkflowConfig(deepcopy(self._data))
 
     def as_dict(self) -> Dict[str, Any]:
         return deepcopy(self._data)
@@ -147,7 +147,7 @@ class AgentConfig:
         return self._data[key]
 
     def __repr__(self) -> str:
-        return f"AgentConfig(bodyparts={self.bodyparts}, cage={self.get('cage.name')})"
+        return f"WorkflowConfig(bodyparts={self.bodyparts}, cage={self.get('cage.name')})"
 
 
 def _resolve_bundled(kind: str, value: Optional[PathLike]) -> Optional[Path]:
@@ -171,11 +171,11 @@ def load_config(
     animal: Optional[Union[str, PathLike]] = None,
     visualization: Optional[PathLike] = None,
     overrides: Optional[Mapping[str, Any]] = None,
-) -> AgentConfig:
+) -> WorkflowConfig:
     """加载并叠层合并配置。"""
-    cfg = AgentConfig() if config is None else AgentConfig(_read_yaml(config) if Path(config).is_file() else {})
+    cfg = WorkflowConfig() if config is None else WorkflowConfig(_read_yaml(config) if Path(config).is_file() else {})
     if config is not None and Path(config).is_file() and Path(config).resolve() != DEFAULT_CONFIG_PATH.resolve():
-        cfg = AgentConfig()
+        cfg = WorkflowConfig()
         cfg.merge_file(config)
     if bodyparts:
         cfg.apply_bodyparts_file(_resolve_bundled("bodyparts", bodyparts) or bodyparts)
@@ -199,6 +199,6 @@ def load_config(
     return cfg
 
 
-def dump_resolved_config(cfg: AgentConfig, output_dir: Optional[PathLike] = None) -> Path:
+def dump_resolved_config(cfg: WorkflowConfig, output_dir: Optional[PathLike] = None) -> Path:
     out = Path(output_dir or cfg.output_dir) / "resolved_config.yaml"
     return cfg.to_yaml(out)

@@ -5,7 +5,7 @@ import json
 import sys
 from pathlib import Path
 
-from .agent import EthologyAgent
+from .workflow import EthologyWorkflow
 from .config import PACKAGE_ROOT, load_config
 from .dlc.project import DLC_STEPS
 
@@ -53,7 +53,7 @@ def build_parser() -> argparse.ArgumentParser:
     common = _common_parser()
     p = argparse.ArgumentParser(
         prog="ethology",
-        description="笼内猕猴 DLC tracking / 行为分类 / 学术可视化 Agent",
+        description="笼内猕猴 DLC tracking / 行为分类 / 学术可视化 Workflow",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -121,7 +121,7 @@ def _resolve_named_yaml(kind: str, value: str) -> str:
     return value
 
 
-def _make_agent(args) -> EthologyAgent:
+def _make_workflow(args) -> EthologyWorkflow:
     cage = _resolve_named_yaml("cages", args.cage) if getattr(args, "cage", None) else None
     animal = getattr(args, "animal", None)
     cfg = load_config(
@@ -159,7 +159,7 @@ def _make_agent(args) -> EthologyAgent:
         cfg.set("video_annotation.max_frames", args.max_frames)
     if args.cmd == "annotate-video" and getattr(args, "start_frame", None) is not None:
         cfg.set("video_annotation.start_frame", int(args.start_frame))
-    return EthologyAgent(cfg)
+    return EthologyWorkflow(cfg)
 
 
 def main(argv=None) -> int:
@@ -172,12 +172,12 @@ def main(argv=None) -> int:
         print(f"已写入 {dest}")
         return 0
 
-    agent = _make_agent(args)
+    workflow = _make_workflow(args)
 
     if args.cmd == "track":
         if args.dry_run:
-            agent.config.set("dlc.dry_run", True)
-        result = agent.track(
+            workflow.config.set("dlc.dry_run", True)
+        result = workflow.track(
             videos=_csv_list(args.videos),
             bodyparts=_csv_list(args.bodyparts) if args.bodyparts else None,
             steps=_csv_list(args.steps) or DLC_STEPS[:2],
@@ -189,7 +189,7 @@ def main(argv=None) -> int:
     if args.cmd in {"classify", "run"}:
         path = Path(args.input)
         if getattr(args, "no_viz", False):
-            agent.config.set("visualization.plots", [])
+            workflow.config.set("visualization.plots", [])
         kwargs = dict(
             skip_preprocess=args.skip_preprocess,
             animal_id=args.animal,
@@ -200,7 +200,7 @@ def main(argv=None) -> int:
             animals = _csv_list(getattr(args, "animals", None))
             days_raw = _csv_list(getattr(args, "days", None))
             days = [int(x) for x in days_raw] if days_raw else None
-            results = agent.run_directory(
+            results = workflow.run_directory(
                 path,
                 pattern=args.pattern,
                 animals=animals,
@@ -209,7 +209,7 @@ def main(argv=None) -> int:
             )
             print(json.dumps(results, ensure_ascii=False, indent=2, default=str))
         else:
-            result = agent.run(path, **kwargs)
+            result = workflow.run(path, **kwargs)
             print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
         return 0
 
@@ -222,7 +222,7 @@ def main(argv=None) -> int:
         st = pd.read_csv(args.stereotypy) if args.stereotypy else None
         cr = pd.read_csv(args.circling) if args.circling else None
         stem = args.stem or Path(args.segments).stem.replace("_features-segment", "")
-        artifacts = agent.visualize(stem, segs, kp, feat, st, cr, plots=_csv_list(args.plots))
+        artifacts = workflow.visualize(stem, segs, kp, feat, st, cr, plots=_csv_list(args.plots))
         print(json.dumps(artifacts, ensure_ascii=False, indent=2))
         return 0
 
@@ -242,7 +242,7 @@ def main(argv=None) -> int:
                         continue
                     jobs.extend(discover_annotation_jobs(video_dir, sub, stem=args.stem))
         else:
-            sessions_root = agent.output_dir / "sessions"
+            sessions_root = workflow.output_dir / "sessions"
             jobs = []
             if sessions_root.is_dir():
                 for sub in sorted(sessions_root.iterdir()):
@@ -253,7 +253,7 @@ def main(argv=None) -> int:
             kp = pd.read_csv(kp_path)
             segs = pd.read_csv(seg_path)
             meta_animal = stem.split("-")[0] if "-" in stem else None
-            out = agent.annotate_video(
+            out = workflow.annotate_video(
                 stem,
                 kp,
                 segs,

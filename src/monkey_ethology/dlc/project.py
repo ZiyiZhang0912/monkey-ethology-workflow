@@ -9,7 +9,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 import yaml
 
-from ..config import AgentConfig
+from ..config import WorkflowConfig
 
 DLC_STEPS = [
     "create_project",
@@ -54,7 +54,7 @@ class DLCProjectManager:
     - deeplabcut.extract_outlier_frames / refine_labels / merge_datasets
     """
 
-    def __init__(self, config: AgentConfig):
+    def __init__(self, config: WorkflowConfig):
         self.config = config
         self.dlc, self._import_error = _try_import_dlc()
         self.config_path: Optional[Path] = None

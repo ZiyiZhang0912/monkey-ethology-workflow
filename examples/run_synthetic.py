@@ -11,7 +11,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from monkey_ethology.agent import EthologyAgent
+from monkey_ethology.workflow import EthologyWorkflow
 from monkey_ethology.config import load_config
 
 
@@ -72,8 +72,8 @@ def main():
     df = make_synthetic()
     df.to_csv(csv_path, index=False)
 
-    agent = EthologyAgent(cfg)
-    result = agent.run(csv_path, animal_id="default")
+    workflow = EthologyWorkflow(cfg)
+    result = workflow.run(csv_path, animal_id="default")
     print("合成数据演示完成")
     print(result)
 

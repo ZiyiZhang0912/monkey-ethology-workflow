@@ -1,6 +1,6 @@
 # Architecture
 
-Pipeline stages exposed by `EthologyAgent`:
+Pipeline stages exposed by `EthologyWorkflow`:
 
 1. **Ingest** — DeepLabCut `.h5` / multi-header `.csv` or flat `Joint_{x,y,p}` tables
 2. **Preprocess** — occlusion interpolation, position anomaly repair, optional median smoothing

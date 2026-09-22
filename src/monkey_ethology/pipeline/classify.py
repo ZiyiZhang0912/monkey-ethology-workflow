@@ -1,5 +1,5 @@
 """兼容入口：分类流水线。"""
 
-from ..agent import EthologyAgent
+from ..workflow import EthologyWorkflow
 
-__all__ = ["EthologyAgent"]
+__all__ = ["EthologyWorkflow"]
