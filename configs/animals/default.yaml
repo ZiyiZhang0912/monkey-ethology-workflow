@@ -1,0 +1,10 @@
+# 通用 locomotion 阈值（适用于任意个体）。
+# --animal 只是会话标签（如 M01），不要求存在同名 YAML。
+# 仅当某只动物需要单独调参时，再复制本文件为 {id}.yaml。
+animal_id: default
+velocity_threshold: 10.0
+displacement_threshold: 4.0
+window_threshold: 5
+head_tail_difference_threshold: 75.0
+com_x_threshold: 5.5
+com_y_threshold: 10.5

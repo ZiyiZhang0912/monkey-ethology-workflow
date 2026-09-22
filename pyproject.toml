@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "monkey-ethology-agent"
+version = "0.1.0"
+description = "Cage-housed macaque DLC tracking, rule-based ethology, and academic visualization agent"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "numpy",
+  "pandas",
+  "scipy",
+  "matplotlib",
+  "pyyaml",
+  "h5py",
+  "tables",
+  "opencv-python-headless",
+]
+
+[project.optional-dependencies]
+dlc = ["deeplabcut"]
+viz = ["streamlit"]
+dev = ["pytest"]
+
+[project.scripts]
+ethology = "monkey_ethology.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

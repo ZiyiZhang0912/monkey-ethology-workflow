@@ -1,0 +1,32 @@
+# 用户可在此扩展更多标记点；COM 仍可由 com_joints 子集计算
+names:
+  - Head
+  - Nose
+  - LeftEar
+  - RightEar
+  - Back
+  - LeftShoulder
+  - RightShoulder
+  - LeftHip
+  - RightHip
+  - Tail(Root)
+skeleton:
+  - [Nose, Head]
+  - [Head, LeftEar]
+  - [Head, RightEar]
+  - [Head, Back]
+  - [Back, LeftShoulder]
+  - [Back, RightShoulder]
+  - [Back, LeftHip]
+  - [Back, RightHip]
+  - [Back, Tail(Root)]
+com_joints: [Head, Back, Tail(Root)]
+orientation_pairs:
+  - [Head, Back]
+  - [Back, Tail(Root)]
+  - [Head, Tail(Root)]
+head_joint: Head
+tail_joint: Tail(Root)
+sitting_joints: [Back, Tail(Root)]
+aliases:
+  Tail: Tail(Root)

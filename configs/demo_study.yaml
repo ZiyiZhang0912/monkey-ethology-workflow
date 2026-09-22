@@ -1,0 +1,21 @@
+# 叠加在 default.yaml 上：本次演示用 2 只猴 × 3 天（可按实验改）
+study:
+  animals: ["562", "883"]
+  days: [1, 2, 3]
+  filename_template: "{animal}-day{day}"
+  input_pattern: "*.csv"
+
+io:
+  output_dir: ./output/demo_viz
+
+visualization:
+  language: en
+  formats: [png]
+  dpi: 200
+
+# 原始视频目录（与 stem 同名，如 562-day1.MP4）
+video_annotation:
+  enabled: true
+  video_dir: ./data/sample/demo_cohort/videos
+  # 预览可设 max_frames: 750；整段标注设为 null
+  max_frames: null

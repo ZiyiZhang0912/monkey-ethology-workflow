@@ -1,0 +1,36 @@
+language: zh
+style: academic
+dpi: 300
+formats: [png, pdf]
+figsize: [10.0, 6.0]
+font_family: PingFang SC
+colormap: cividis
+plots:
+  - ethogram
+  - raster
+  - time_budget
+  - bout_duration
+  - transition
+  - trajectory
+  - heatmap
+  - velocity
+  - features
+  - position
+  - quality
+  - stereotypy
+  - circling
+  - publication_figure
+  - com_trajectory_heatmap
+  - body_center
+  - position_analysis
+  - behavior_comparison
+colors:
+  Static: "#9E9E9E"
+  Walking: "#64B5F6"
+  Climbing: "#81C784"
+  stereotypy: "#D55E00"
+  circling_cw: "#CC79A7"
+  circling_ccw: "#E69F00"
+background_image: assets/background.jpg
+show_reasons: true
+export_csv: true

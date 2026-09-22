@@ -1,0 +1,18 @@
+# 默认三点骨架（Head / Back / Tail(Root)）
+names:
+  - Head
+  - Back
+  - Tail(Root)
+skeleton:
+  - [Head, Back]
+  - [Back, Tail(Root)]
+com_joints: [Head, Back, Tail(Root)]
+orientation_pairs:
+  - [Head, Back]
+  - [Back, Tail(Root)]
+  - [Head, Tail(Root)]
+head_joint: Head
+tail_joint: Tail(Root)
+sitting_joints: [Back, Tail(Root)]
+aliases:
+  Tail: Tail(Root)

@@ -1,0 +1,189 @@
+# 笼内自由活动猕猴：DLC tracking → 行为分类 → 学术可视化
+# 所有字段均可被 CLI / Python API 覆盖。不修改 pythonProject 内任何文件。
+
+project:
+  name: monkey_cage
+  experimenter: experimenter
+  working_directory: ./output
+  copy_videos: true
+  videotype: .mp4
+  random_seed: 42
+
+# 实验队列：个体数 / 天数均不固定，在此自行配置。
+# animals / days 为空列表时，从输入文件名自动发现，不限制数量。
+study:
+  animals: []          # 例: ["M01", "M02"] 或 ["562", "883"]
+  days: []             # 例: [1, 2, 3]；对应文件名中的 dayN
+  filename_template: "{animal}-day{day}"   # 会话命名约定
+  input_pattern: "*.csv"                   # 可被 CLI --pattern 覆盖
+
+# 每次实验由用户指定标记点；此处为默认最小骨架
+bodyparts:
+  names:
+    - Head
+    - Back
+    - Tail(Root)
+  skeleton:
+    - [Head, Back]
+    - [Back, Tail(Root)]
+  com_joints: [Head, Back, Tail(Root)]
+  orientation_pairs:
+    - [Head, Back]
+    - [Back, Tail(Root)]
+    - [Head, Tail(Root)]
+  head_joint: Head
+  tail_joint: Tail(Root)
+  sitting_joints: [Back, Tail(Root)]
+  aliases:
+    Tail: Tail(Root)
+    TailRoot: Tail(Root)
+    "Tail (Root)": Tail(Root)
+
+cage:
+  name: small_cage
+  fps: 25
+  width: 720
+  height: 406
+  x_min: 0
+  x_max: 720
+  y_min: 0
+  y_max: 406
+  # 图像 y 向上减小；小于该值视为高处（攀爬）
+  climbing_y: 202
+  pixel_to_cm: 0.3202   # 130 / 406
+  session_max_sec: 1800  # 分析时长上限，0 表示不截断
+
+dlc:
+  numframes2pick: 40
+  extract_mode: automatic   # automatic | manual
+  extract_algo: kmeans      # kmeans | uniform
+  userfeedback: false
+  net_type: resnet_50
+  augmenter_type: imgaug
+  shuffle: 1
+  displayiters: 1000
+  saveiters: 10000
+  maxiters: 1030000
+  pcutoff: 0.6
+  save_as_csv: true
+  filterpredictions: true
+  create_labeled_video: true
+  # 未安装 DeepLabCut 时仅生成项目配置与接口调用计划
+  dry_run: false
+
+preprocess:
+  p_threshold: 0.4
+  min_occlusion_duration: 3
+  sitting_min_frames: 30
+  max_displacement: 100
+  max_velocity: 50
+  max_acceleration: 30
+  smooth_window: 5
+  smooth_p_threshold: 0.5
+  enable_occlusion: true
+  enable_anomaly: true
+  enable_smooth: true
+
+features:
+  window_size: 13
+  p_threshold: 0.4
+
+locomotion:
+  enabled: true
+  # 默认阈值；若提供 animal_id 且 configs/animals/{id}.yaml 存在则覆盖
+  velocity_threshold: 10.0
+  displacement_threshold: 4.0
+  window_threshold: 5
+  head_tail_difference_threshold: 75.0
+  com_x_threshold: 5.5
+  com_y_threshold: 10.5
+  subwindow_size: 4
+  labels:
+    0: Static
+    2: Walking
+    3: Climbing
+
+stereotypy:
+  enabled: true
+  window_sec: 3.0
+  step_sec: 1.0
+  p_threshold: 0.5
+  periodicity_threshold: 8.0
+  angular_std_threshold: 2.0
+  circle_error_threshold: 700.0
+  cumulative_displacement_threshold: 6.283185307179586  # 2π
+
+circling:
+  enabled: true
+  body_part: Head
+  min_likelihood: 0.5
+  window_size: 40
+  min_angle: 180
+  min_radius: 15
+  max_radius: 250
+  x_min: 200
+  x_max: 550
+  y_min: 150
+  y_max: 300
+  max_radius_cv: 0.8
+  min_ellipticity: 1.0
+  max_ellipticity: 5.0
+  fit_error_max: 0.3
+
+visualization:
+  language: zh          # zh | en
+  style: academic       # academic | presentation
+  dpi: 300
+  formats: [png, pdf]
+  figsize: [10.0, 6.0]
+  font_family: PingFang SC
+  colormap: cividis
+  # 可按需删减；all 表示生成全部图
+  plots:
+    - ethogram
+    - raster
+    - time_budget
+    - bout_duration
+    - transition
+    - trajectory
+    - heatmap
+    - velocity
+    - features
+    - position
+    - quality
+    - stereotypy
+    - circling
+    - publication_figure
+    - com_trajectory_heatmap
+    - body_center
+    - position_analysis
+    - behavior_comparison
+  colors:
+    # BehaviorStateVisualization.py
+    Static: "#9E9E9E"
+    Walking: "#64B5F6"
+    Climbing: "#81C784"
+    stereotypy: "#D55E00"
+    circling_cw: "#CC79A7"
+    circling_ccw: "#E69F00"
+  background_image: assets/background.jpg
+  show_reasons: true
+  export_csv: true
+
+# 用分类结果标注原始视频（对齐 SmallCage/MotionVideoAnnotator）
+# 需提供与 stem 同名的视频，或在 CLI 用 --video-dir / --videos
+video_annotation:
+  enabled: true
+  video_dir: null              # 例: /path/to/videos （内含 562-day1.MP4）
+  output_subdir: annotated_videos
+  draw_labels: true            # 关节点旁写名称与 likelihood
+  show_animal_on_head: false   # true 时 Head 标签显示动物 ID（如 883）
+  p_threshold: 0.5             # 低于此置信度点标红
+  max_frames: null             # 仅导出前 N 帧（预览）；null=整段
+  start_frame: 0
+
+io:
+  # 只读引用既有数据时填写路径，不会写入该目录
+  external_data_root: null
+  output_dir: ./output
+  overwrite: true
